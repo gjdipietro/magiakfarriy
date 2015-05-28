@@ -1,0 +1,341 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<title>Magiac Farriy</title>
+
+<!--Favicons -->
+<link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="favicon/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="favicon/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="favicon/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="favicon/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/manifest.json">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+<meta name="theme-color" content="#ffffff">
+
+<!--Web font -->
+<link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css">
+<style>
+	* {
+	  margin: 0;
+	  padding: 0;
+	}
+	body {
+	  background-image: url("https://dl.dropboxusercontent.com/u/26268356/selmas/bg.png");
+	  background-repeat: repeat;
+	}
+
+	.header {
+	  padding: 20px 0;
+	  background-image: url("https://dl.dropboxusercontent.com/u/26268356/selmas/headerBorder.png");
+	  background-repeat: repeat-x;
+	  background-position: bottom;
+	}
+	.header .logo {
+	  margin: 0 auto;
+	  display: block;
+	}
+
+	.hideText {
+	  text-indent: 100%;
+	  white-space: nowrap;
+	  overflow: hidden;
+	  font-size: 0;
+	  height: 0;
+	}
+
+	canvas {
+	  position: relative;
+	  top:0;
+	  bottom:0;
+	  margin: 0 auto;
+	  display: block;
+	  border: 0;
+	  width: 100%;
+	}
+
+	.container {
+	  position: relative;
+	}
+
+    .box {
+        font-family: 'Gloria Hallelujah', cursive;
+        font-weight: bold;
+        border: 4px solid #333;
+        padding: 0 24px;
+        border-radius: 42px 30px 23px 42px;
+        line-height: 50px;
+    }
+	.score {
+	    position: absolute;
+	    right: 2em;
+	    top: 1em;
+	    color: #333;
+        font-size: 30px;
+	}
+	.score img, .score p {
+	  display: inline;
+	}
+	.score img {
+	  vertical-align: middle;
+	}
+    .byline {
+        position: absolute;
+        font-size: 20px;
+        left: 2em;
+        bottom: 1em;
+    }
+</style>
+</head>
+
+
+
+<body>
+<header class="header" id="header" role="header">
+    <h1 class="hideText">Magiak Farriy</h1>
+    <img class="logo" src="https://dl.dropboxusercontent.com/u/26268356/selmas/header.png">
+</header>
+<div class="container">
+	<canvas id="fairyLand"></canvas>
+  	<div class="score box">
+    	<img src="https://dl.dropboxusercontent.com/u/26268356/selmas/flower.png">
+   		<p id="score">0</p>
+  	</div>
+    <div class="byline box">
+        <a href="magiakfarriy.jpg">Designed by Selma</a>
+    </div>
+</div>
+
+
+<script>
+    // twitter @msvaljek
+    // http://msvaljek.blogspot.com/2013/08/canvas-simple-game.html
+
+    // standard shim
+    window.requestAnimFrame = (function(){
+        return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        function( callback ) {
+        	window.setTimeout(callback, 1000 / 60);
+        };
+    })();
+
+    // helper functions
+    function randomMax(max) {
+        return ~~(Math.random() * max);
+    }
+    function distance(a, b) {
+        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+    }
+
+    var headersize = 200;
+    var canvas = document.getElementById('fairyLand');
+    var ctx = canvas.getContext('2d');
+    var scoreOutput = document.getElementById('score');
+
+    var activeKeys = [];
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - headersize; //height of header
+
+    var fairyObj = new Image();
+    fairyObj.src = 'https://dl.dropboxusercontent.com/u/26268356/selmas/fairy.png';
+
+    var magicObj = new Image();
+    magicObj.src = 'https://dl.dropboxusercontent.com/u/26268356/selmas/magic.png';
+
+    var plantObj = new Image();
+    plantObj.src = 'https://dl.dropboxusercontent.com/u/26268356/selmas/flowerGame.png';
+
+    var plantObjBloom = new Image();
+    plantObjBloom.src = 'https://dl.dropboxusercontent.com/u/26268356/selmas/flowerGameBloom.png';
+
+
+    // globals
+    var twoPi = 2 * Math.PI,
+    	playerSize = 150,
+    	playerStartX = 200,
+    	playerSpeed = 20,
+    	bulletSpeed = 12,
+    	bulletSize = 100,
+    	bulletTimeout = 500,
+    	enemySize = 100,
+    	enemySpeedX = 13,
+    	enemySpeedY = 0,
+    	enemyCreation = 1400;
+    	fairyScore = 0;
+
+
+    // Fairy Object
+    var Fairy = function (x, y) {
+      	this.x = x;
+    	this.y = y;
+    	this.bullets = [];
+    	this.lastShot = new Date();
+    };
+    Fairy.prototype.shoot = function () {
+    	var checkTime = new Date();
+    	if ((checkTime - this.lastShot) > bulletTimeout) {
+    		var bullet = {
+    			y : this.y,
+    			x : this.x + playerSize
+    		};
+    		this.bullets.push(bullet);
+    		this.lastShot = new Date();
+    	}
+    };
+    Fairy.prototype.draw = function () {
+    	if (activeKeys['left']) {
+    		this.x -= playerSpeed;
+    	}
+    	if (activeKeys['right']) {
+    		this.x += playerSpeed;
+    	}
+    	if (activeKeys['up']) {
+    		this.y -= playerSpeed;
+    	}
+    	if (activeKeys['down']) {
+    		this.y += playerSpeed;
+    	}
+    	if (activeKeys['shoot']) {
+    		this.shoot();
+    	}
+    	if (this.x - playerSize < 0) {
+    		this.x = playerSize;
+    	}
+    	if (this.y - playerSize < 0) {
+    		this.y = playerSize;
+    	}
+    	if (this.x + playerSize > canvas.width) {
+    		this.x = canvas.width - playerSize;
+    	}
+    	if (this.y + playerSize > canvas.height) {
+    		this.y = canvas.height - playerSize;
+    	}
+      	ctx.drawImage(fairyObj, this.x, this.y);
+    	
+    	for (var i = 0; i < this.bullets.length; i++) {
+    		this.bullets[i].x += bulletSpeed;
+    		this.bullets[i].y += bulletSpeed;
+
+    		ctx.drawImage(magicObj, this.bullets[i].x, this.bullets[i].y);
+
+    		if (this.bullets[i].x > canvas.width) {
+    			this.bullets.splice(i, 1);
+    		} else {
+    			for (var k = 0; k < enemies.length; k++) {
+    				if (this.bullets[i] && enemies[k] && distance (this.bullets[i], enemies[k]) < enemySize) {
+    					enemies[k].dead = true;
+    					fairyScore++;
+    					this.bullets.splice(i, 1);
+    				}
+    			}
+    		}
+    	}
+    };
+    var fairy = new Fairy(playerStartX, ~~(canvas.height / 2));
+
+
+    //Enemies
+    var Enemy = function () {
+    	this.x = canvas.width;
+    	this.y = canvas.height;
+    	this.fy = 0;
+    	this.dead = false;
+    	this.touchedPlayer = false;
+    };
+    Enemy.prototype.draw = function () {
+    	this.x -= enemySpeedX;
+    	this.y += this.fy * enemySpeedY;
+    	if (this.y - enemySize < 0) {
+    		this.y = enemySize;
+    		this.fy *= -1;
+    	}
+    	if (this.y + enemySize > canvas.height) {
+    		this.y = canvas.height - enemySize;
+    		this.fy *= -1;
+    	}
+    	if (this.x < 0) {
+    		this.dead = true;
+    	}
+    	if (!this.touchedPlayer && distance (this, fairy) < (enemySize + playerSize)) {
+    		this.touchedPlayer = true;
+    	}
+
+        ctx.drawImage(plantObj, this.x, this.y);
+    };
+    Enemy.prototype.bloom = function() {
+        ctx.drawImage(plantObjBloom, this.x, this.y); 
+    }
+
+    var enemies = [];
+    function createEnemy() {
+    	enemies.push(new Enemy());
+    	setTimeout(createEnemy, enemyCreation);
+    }
+    setTimeout(createEnemy, enemyCreation);
+
+    window.onresize = function() {
+    	canvas.width = window.innerWidth;
+    	canvas.height = window.innerHeight - headersize;
+    };
+
+
+
+    function setKeysTo(e, state) {
+    	if(e.keyCode == 37) {
+    		activeKeys['left'] = state;
+    	} else if(e.keyCode == 39) {
+    		activeKeys['right'] = state;
+    	}  else if(e.keyCode == 38) {
+    		activeKeys['up'] = state;
+    	} else if(e.keyCode == 40) {
+    		activeKeys['down'] = state;
+    	} else if (e.keyCode == 32) {
+    		activeKeys['shoot'] = state;
+    	}
+    	return false;
+    }
+
+    document.onkeydown = function(e) {
+    	return setKeysTo(e, true);
+    };
+
+    document.onkeyup = function(e) {
+    	return setKeysTo(e, false);
+    };
+
+
+
+    (function animloop(){
+    	requestAnimFrame(animloop);
+    	ctx.clearRect(0, 0, canvas.width, canvas.height);
+    	fairy.draw();
+
+    	for (var j = 0; j < enemies.length; j++) {
+    		enemies[j].draw();
+    		if (enemies[j].dead) {
+    			enemies[j].bloom()
+    		}
+    	}
+
+    })();
+
+    setInterval(function(){
+      scoreOutput.innerHTML = fairyScore;
+    }, 300);
+    //@ sourceURL=pen.js
+</script>
+</body>
+</html>
