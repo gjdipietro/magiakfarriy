@@ -27,9 +27,10 @@
 <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css">
 <style>
+
 	* {
-	  margin: 0;
-	  padding: 0;
+		margin: 0;
+	  	padding: 0;
 	}
 	body {
 	  background-image: url("https://dl.dropboxusercontent.com/u/26268356/selmas/bg.png");
@@ -96,26 +97,87 @@
         left: 2em;
         bottom: 1em;
     }
+
+
+    .modal-backdrop {
+    	opacity: 0.75;
+    	position: fixed;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 100;
+		background-color: #000000;
+    }
+    .instructions {
+    	font-family: 'Gloria Hallelujah', cursive;
+    	background: #FFF;
+    	width: 560px;
+		padding: 20px;
+		margin: 50px auto;
+    	position: absolute;
+    	top: 0;
+		right: 0;
+		left: 0;
+		z-index: 200;
+		border-radius: 20px;
+		box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    }
+    .instructions h1 {
+    	margin: 0;
+    }
+    .instructions p {
+    	margin-bottom: 1em;
+    	font-size: 1.5em;
+    }
+    .instructions button {
+    	margin: 0 auto;
+    	display: block;
+    }
+
+    code {
+    	background: #f5f2f0;
+    	border: 1px solid #ddd;
+    	color: #905;
+    	text-shadow: 0 1px white;
+		font-family: Consolas, Monaco, 'Andale Mono', monospace;
+		direction: ltr;
+		text-align: left;
+		padding: 6px;
+		white-space: pre;
+    }
 </style>
 </head>
 
 
 
 <body>
-<header class="header" id="header" role="header">
-    <h1 class="hideText">Magiak Farriy</h1>
-    <img class="logo" src="https://dl.dropboxusercontent.com/u/26268356/selmas/header.png">
-</header>
-<div class="container">
-	<canvas id="fairyLand"></canvas>
-  	<div class="score box">
-    	<img src="https://dl.dropboxusercontent.com/u/26268356/selmas/flower.png">
-   		<p id="score">0</p>
-  	</div>
-    <div class="byline box">
-        <a href="magiakfarriy.jpg">Designed by Selma</a>
-    </div>
-</div>
+
+	<div class="instructions" id="instructions">
+		<h1>Help the fairy</h1>
+		<p>
+			You need to help the fiari 
+			Use the <code>Arrow keys</code> to fly and <code>Spacebar</code> to use your wand.
+		</p>
+		<button type="button" class="box" onclick="startGame()">Start</button>
+	</div>
+	<div class="modal-backdrop" id="modal-backdrop"></div>
+
+	<header class="header" id="header" role="header">
+	    <h1 class="hideText">Magiak Farriy</h1>
+	    <img class="logo" src="https://dl.dropboxusercontent.com/u/26268356/selmas/header.png">
+	</header>
+
+	<div class="container">
+		<canvas id="fairyLand"></canvas>
+	  	<div class="score box">
+	    	<img src="https://dl.dropboxusercontent.com/u/26268356/selmas/flower.png">
+	   		<p id="score">0</p>
+	  	</div>
+	    <div class="byline box">
+	        <a href="magiakfarriy.jpg">Designed by Selma</a>
+	    </div> 
+	</div>
 
 
 <script>
@@ -165,7 +227,7 @@
     // globals
     var twoPi = 2 * Math.PI,
     	playerSize = 150,
-    	playerStartX = 200,
+    	playerStartX = 1000,
     	playerSpeed = 20,
     	bulletSpeed = 12,
     	bulletSize = 100,
@@ -173,7 +235,7 @@
     	enemySize = 100,
     	enemySpeedX = 13,
     	enemySpeedY = 0,
-    	enemyCreation = 1400;
+    	enemyCreation = 2000;
     	fairyScore = 0;
 
 
@@ -244,7 +306,7 @@
     		}
     	}
     };
-    var fairy = new Fairy(playerStartX, ~~(canvas.height / 2));
+    var fairy = new Fairy(~~(canvas.width / 2), ~~(canvas.height / 2));
 
 
     //Enemies
@@ -278,7 +340,6 @@
     Enemy.prototype.bloom = function() {
         ctx.drawImage(plantObjBloom, this.x, this.y); 
     }
-
     var enemies = [];
     function createEnemy() {
     	enemies.push(new Enemy());
@@ -286,13 +347,13 @@
     }
     setTimeout(createEnemy, enemyCreation);
 
+
+
+
     window.onresize = function() {
     	canvas.width = window.innerWidth;
     	canvas.height = window.innerHeight - headersize;
     };
-
-
-
     function setKeysTo(e, state) {
     	if(e.keyCode == 37) {
     		activeKeys['left'] = state;
@@ -307,7 +368,6 @@
     	}
     	return false;
     }
-
     document.onkeydown = function(e) {
     	return setKeysTo(e, true);
     };
@@ -318,23 +378,34 @@
 
 
 
-    (function animloop(){
-    	requestAnimFrame(animloop);
-    	ctx.clearRect(0, 0, canvas.width, canvas.height);
-    	fairy.draw();
+    function startGame() {
+    	var ins = document.getElementById("instructions");
+    	var modalbackdrop = document.getElementById("modal-backdrop");
+    	ins.remove();
+		modalbackdrop.remove();
 
-    	for (var j = 0; j < enemies.length; j++) {
-    		enemies[j].draw();
-    		if (enemies[j].dead) {
-    			enemies[j].bloom()
-    		}
-    	}
+    	(function animloop(){
+	    	requestAnimFrame(animloop);
+	    	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	    	fairy.draw();
 
-    })();
+	    	for (var j = 0; j < enemies.length; j++) {
+	    		enemies[j].draw();
+	    		if (enemies[j].dead) {
+	    			enemies[j].bloom()
+	    		}
+	    	}
+    	})();
+
+    }
+    
+
 
     setInterval(function(){
       scoreOutput.innerHTML = fairyScore;
     }, 300);
+    
+
     //@ sourceURL=pen.js
 </script>
 </body>
