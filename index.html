@@ -26,14 +26,36 @@
 <!--Web font -->
 <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css">
-<style>
 
-	* {
+<style>
+	
+    * {
 		margin: 0;
 	  	padding: 0;
 	}
+
+    a,
+    a:visited {
+        color: #E26EA8;
+        text-decoration: none;
+    }
+    a:hover { 
+        color: #B75888;
+    }
+    
+    button {
+        margin: 0 auto;
+        display: block;
+        width: 100%;
+        background: #E26EA8;
+        color: #FFF;
+        transition: background .2s ease;
+    }
+    button:hover {
+        background: #B75888;
+    }
 	body {
-	  background-image: url("https://dl.dropboxusercontent.com/u/26268356/selmas/bg.png");
+	  background-image: url("https://dl.dropboxusercontent.com/u/26268356/selmas/bg.gif");
 	  background-repeat: repeat;
 	}
 
@@ -99,7 +121,7 @@
     }
 
 
-    .modal-backdrop {
+    .backdrop {
     	opacity: 0.75;
     	position: fixed;
 		top: 0;
@@ -109,10 +131,10 @@
 		z-index: 100;
 		background-color: #000000;
     }
-    .instructions {
+    .modal {
     	font-family: 'Gloria Hallelujah', cursive;
     	background: #FFF;
-    	width: 560px;
+    	width: 650px;
 		padding: 20px;
 		margin: 50px auto;
     	position: absolute;
@@ -123,16 +145,33 @@
 		border-radius: 20px;
 		box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
     }
-    .instructions h1 {
+    .modal h1 {
     	margin: 0;
     }
-    .instructions p {
+    .modal p {
     	margin-bottom: 1em;
     	font-size: 1.5em;
+        color: #444;
     }
-    .instructions button {
-    	margin: 0 auto;
-    	display: block;
+    .modal img {
+        max-width: 100%;
+    }
+    .closeModal {
+        position: absolute;
+        z-index: 220000;
+        top: -12px;
+        right: -12px;
+        background: #000;
+        border-radius: 50%;
+        padding: 12px;
+        height: 20px;
+        width: 20px;
+        cursor: pointer;
+        color: #FFF;
+        line-height: 20px;
+        text-align: center;
+        border: 2px solid #FFF;
+        box-shadow: 1px 1px #000, -1px -1px #000;
     }
 
     code {
@@ -143,25 +182,28 @@
 		font-family: Consolas, Monaco, 'Andale Mono', monospace;
 		direction: ltr;
 		text-align: left;
-		padding: 6px;
+		padding: 3px;
 		white-space: pre;
+        font-size: .6em;
     }
 </style>
+
 </head>
 
 
 
 <body>
 
-	<div class="instructions" id="instructions">
-		<h1>Help the fairy</h1>
+	<div class="modal" id="instructions">
+		<h1>Save the Flowers!!</h1>
 		<p>
-			You need to help the fiari 
-			Use the <code>Arrow keys</code> to fly and <code>Spacebar</code> to use your wand.
+			The Magiak Farriy must save the flowers!  Use your magic wand <code>Spacebar</code> to help make the flowers bloom,
+            and fly with the <code>Arrow keys</code>
 		</p>
-		<button type="button" class="box" onclick="startGame()">Start</button>
+		<button type="button" class="box" onclick="startGame()">GET STARTED!</button>
 	</div>
-	<div class="modal-backdrop" id="modal-backdrop"></div>
+	<div class="backdrop"></div>
+
 
 	<header class="header" id="header" role="header">
 	    <h1 class="hideText">Magiak Farriy</h1>
@@ -175,7 +217,7 @@
 	   		<p id="score">0</p>
 	  	</div>
 	    <div class="byline box">
-	        <a href="magiakfarriy.jpg">Designed by Selma</a>
+	        <a href="magiakfarriy.jpg" onclick="showModal(this, event)" data-url="magiakfarriy.jpg">Designed by Selma</a>
 	    </div> 
 	</div>
 
@@ -183,7 +225,6 @@
 <script>
     // twitter @msvaljek
     // http://msvaljek.blogspot.com/2013/08/canvas-simple-game.html
-
     // standard shim
     window.requestAnimFrame = (function(){
         return window.requestAnimationFrame ||
@@ -226,7 +267,7 @@
 
     // globals
     var twoPi = 2 * Math.PI,
-    	playerSize = 150,
+    	playerSize = 50,
     	playerStartX = 1000,
     	playerSpeed = 20,
     	bulletSpeed = 12,
@@ -377,12 +418,37 @@
     };
 
 
+    function showModal(src, e) {
+        e.preventDefault();
+        var body = document.getElementsByTagName('body')[0];
+        var newModal = document.createElement("div");
+        var newImg = document.createElement("img");
+        var newBackDrop = document.createElement("div"); 
+        var close = document.createElement("a"); 
+
+        newBackDrop.className = "backdrop";
+        newModal.className = "modal";
+        close.className = "closeModal";
+        close.innerHTML = "X";
+        close.role = "button";
+        close.addEventListener("click", destroyModal, false);
+        newImg.src = src.getAttribute("data-url");
+
+        newModal.appendChild(newImg);
+        newModal.appendChild(close);
+        body.appendChild(newModal);
+        body.appendChild(newBackDrop);
+    }
+
+    function destroyModal() {
+        var modal         = document.getElementsByClassName("modal");
+        var modalbackdrop = document.getElementsByClassName("backdrop");
+        modal[0].remove();
+        modalbackdrop[0].remove();
+    }
 
     function startGame() {
-    	var ins = document.getElementById("instructions");
-    	var modalbackdrop = document.getElementById("modal-backdrop");
-    	ins.remove();
-		modalbackdrop.remove();
+    	destroyModal();
 
     	(function animloop(){
 	    	requestAnimFrame(animloop);
