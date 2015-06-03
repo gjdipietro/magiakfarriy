@@ -129,7 +129,7 @@
 		bottom: 0;
 		left: 0;
 		z-index: 100;
-		background-color: #000000;
+		background-color: #FFF;
     }
     .modal {
     	font-family: 'Gloria Hallelujah', cursive;
@@ -144,6 +144,16 @@
 		z-index: 200;
 		border-radius: 20px;
 		box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+        opacity:0;
+        transform: scale(0);
+        transition: all 0.3s;
+    }
+    .modal.big {
+        width: 800px;
+    }
+    .modal.show {
+        opacity: 1;
+        transform: scale(1);
     }
     .modal h1 {
     	margin: 0;
@@ -194,7 +204,7 @@
 
 <body>
 
-	<div class="modal" id="instructions">
+	<div class="modal show" id="instructions">
 		<h1>Save the Flowers!!</h1>
 		<p>
 			The Magiak Farriy must save the flowers!  Use your magic wand <code>Spacebar</code> to help make the flowers bloom,
@@ -425,16 +435,23 @@
         var newImg = document.createElement("img");
         var newBackDrop = document.createElement("div"); 
         var close = document.createElement("a"); 
-
+        newImg.src = src.getAttribute("data-url");
+        newModal.appendChild(newImg);
+        
         newBackDrop.className = "backdrop";
         newModal.className = "modal";
+        setTimeout( function() {
+            newModal.className = "modal show big";
+        }, 300 );
+        
+
         close.className = "closeModal";
         close.innerHTML = "X";
         close.role = "button";
         close.addEventListener("click", destroyModal, false);
-        newImg.src = src.getAttribute("data-url");
+        
 
-        newModal.appendChild(newImg);
+        
         newModal.appendChild(close);
         body.appendChild(newModal);
         body.appendChild(newBackDrop);
@@ -449,7 +466,6 @@
 
     function startGame() {
     	destroyModal();
-
     	(function animloop(){
 	    	requestAnimFrame(animloop);
 	    	ctx.clearRect(0, 0, canvas.width, canvas.height);
